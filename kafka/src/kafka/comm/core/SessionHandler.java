@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import kafka.MasterPublisher;
 import kafka.MasterService;
 import kafka.TopicMessage;
 import kafka.comm.extra.JsonBuilder;
@@ -34,6 +35,7 @@ class SessionHandler extends Thread {
 	private JsonBuilder _json ;
 	private MasterService _masterService;
 	private boolean _verbose = true;
+	private MasterPublisher messagePublisher;
 
 	public SessionHandler(Socket connection, long id) {
 		this._connection = connection;
@@ -135,6 +137,9 @@ class SessionHandler extends Thread {
 						} else if (msg.getType() == MessageType.subscribeTopic) {
 							 String s = _masterService.substribe_topic(msg.getTopicMessage().getTopic_name(),msg.getSource());
 							 respondToCreateTopic(msg,s);
+						}else if (msg.getType() == MessageType.pullMsg) {
+							 String message = messagePublisher.on(msg.getTopicMessage().getTopic_name(),msg.getSource());
+							 respondToCreateTopic(msg,message);
 						}else if (msg.getType() == MessageType.sendMessage) {
 							TopicMessage tm = new TopicMessage();
 							tm.setMessageId(msg.getMid());
@@ -210,13 +215,13 @@ class SessionHandler extends Thread {
 	 * 
 	 * @param msg
 	 */
-	private void respondToCreateTopic(Message msg,String s) {
+	private void respondToCreateTopic(Message msg,String message) {
 		if (_verbose)
 			System.out.println("--> responding to join: " + msg);
 		msg.setStatus("200");
 		msg.setSource(""+this.getId());
-		msg.setPayload(s);
-		ackResponse(msg, s);
+		msg.setPayload(message);
+		ackResponse(msg, message);
 	}
 	
 	private void respondToProduceMessage(Message msg,String s) {
