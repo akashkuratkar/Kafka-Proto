@@ -71,13 +71,22 @@ public class ConsoleListener extends Thread {
 				List<Message> list = builder.decode(new String(raw1, 0, len).getBytes());
 				for (Message mesg : list) {
 					System.out.print(mesg.getPayload());
+					if("Error".equals(mesg.getPayload())) {
+						System.err.println("Error occurred on server side");
+					}
 //					if (_verbose)
 //						System.out.println("--> " + msg);
 				}
 				Thread.sleep(5000);
 			} catch (Exception e
 					) {
-				// TODO report but, continue
+				System.err.println("Error occured:"+ e.getMessage());
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		}
 

@@ -3,6 +3,7 @@ package client;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Properties;
+import java.util.Scanner;
 
 import payload.MessageBuilder;
 
@@ -59,11 +60,14 @@ public class ConsoleApp {
 //		System.out.println("exit - end session");
 //		System.out.println("");
 
-		boolean executeOnce = true;
-		while (executeOnce) {
-			executeOnce = false;
+		boolean execute = true;
+		Scanner sc = new Scanner(System.in);
+		while (execute) {
 			try {
 				bc.sendMessage(topicName,MessageBuilder.MessageType.subscribeTopic);
+				String exit = sc.next();
+				if("exit".equals(exit))
+					break;
 
 			} catch (Exception e) {
 				e.printStackTrace();

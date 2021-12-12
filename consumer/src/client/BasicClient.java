@@ -152,20 +152,20 @@ public class BasicClient {
 			_socket.getOutputStream().flush();
 			_sentCount++;
 			
-			byte[] raw = new byte[2048];
-			int len = _socket.getInputStream().read(raw);
-//			if (len <= 0)
-//				continue;
-
-			// Reply from server
-			String rs = new String(raw);
-			System.out.println("    RCV: " + rs);
-			List<Message> list = builder.decode(new String(raw, 0, len).getBytes());
-			for (Message mesg : list) {
-				System.out.print(mesg.getPayload());
-//				if (_verbose)
-//					System.out.println("--> " + msg);
-			}
+//			byte[] raw = new byte[2048];
+//			int len = _socket.getInputStream().read(raw);
+////			if (len <= 0)
+////				continue;
+//
+//			// Reply from server
+//			String rs = new String(raw);
+//			System.out.println("    RCV: " + rs);
+//			List<Message> list = builder.decode(new String(raw, 0, len).getBytes());
+//			for (Message mesg : list) {
+//				System.out.print(mesg.getPayload());
+////				if (_verbose)
+////					System.out.println("--> " + msg);
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
