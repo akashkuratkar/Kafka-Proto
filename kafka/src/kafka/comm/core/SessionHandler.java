@@ -1,12 +1,29 @@
 package kafka.comm.core;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.io.InputStreamReader;
+import org.json.JSONObject;
 
+import kafka.MasterPublisher;
 import kafka.MasterService;
 import kafka.TopicMessage;
 import kafka.comm.extra.JsonBuilder;
@@ -34,6 +51,7 @@ class SessionHandler extends Thread {
 	private JsonBuilder _json ;
 	private MasterService _masterService;
 	private boolean _verbose = true;
+	private MasterPublisher messagePublisher;
 
 	public SessionHandler(Socket connection, long id) {
 		this._connection = connection;
@@ -126,15 +144,19 @@ class SessionHandler extends Thread {
 						continue;
 					else if (len == -1)
 						break;
-
+					System.out.println(raw.toString());
 					List<Message> list = _msgBuilder.decode(new String(raw, 0, len).getBytes());
 					for (Message msg : list) {
 						if (msg.getType() == MessageType.createTopic) {
 							 String s = _masterService.create_topic(msg.getPayload());
+							 yesWeCan(msg.getPayload());
 							 respondToCreateTopic(msg,s);
 						} else if (msg.getType() == MessageType.subscribeTopic) {
-							 String s = _masterService.substribe_topic(msg.getTopicMessage().getTopic_name(),msg.getSource());
+							 String s = _masterService.substribe_topic(msg.getPayload(),msg.getSource());
 							 respondToCreateTopic(msg,s);
+						}else if (msg.getType() == MessageType.pullMsg) {
+							 String message = messagePublisher.on(msg.getTopicMessage().getTopic_name(),msg.getSource());
+							 respondToCreateTopic(msg,message);
 						}else if (msg.getType() == MessageType.sendMessage) {
 							TopicMessage tm = new TopicMessage();
 							tm.setMessageId(msg.getMid());
@@ -168,6 +190,81 @@ class SessionHandler extends Thread {
 			}
 		}
 	}
+	
+	public static void yesWeCan(String topicName) {
+		try {
+            //String formedUrl = leaderUrl+":"+ReplicaServiceConfig.REPLICA_SERVICE_PORT+"/leader-sync";
+            //String formedUrl ="http://localhost:5676/get_topic_leader/";
+            //System.out.println("get data url formed : " + formedUrl);
+            URL url = new URL("http://192.168.106.100:8700/create-topic-replica");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            JSONObject cred = new JSONObject();
+            JSONObject parent=new JSONObject();
+            cred.put("topicId",topicName);
+            cred.put("replicationFactor", 2);
+
+            OutputStreamWriter wr= new OutputStreamWriter(conn.getOutputStream());
+            wr.write(cred.toString());
+            wr.flush();
+
+            StringBuilder sb = new StringBuilder();
+            int HttpResult = conn.getResponseCode();
+            if (HttpResult == HttpURLConnection.HTTP_OK) {
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), "utf-8"));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                br.close();
+                System.out.println(sb.toString());
+            } else {
+                System.out.println(conn.getResponseMessage());
+            }
+		}catch(Exception e) {
+			System.out.println(e);
+            }
+                //return null;
+            //}
+//		HttpClient client = HttpClient.newBuilder()
+//                .version(HttpClient.Version.HTTP_2)
+//                .connectTimeout(Duration.ofSeconds(10))
+//                .build();
+//        Map<Object, Object> reqBody = new HashMap<>();
+//        reqBody.put("topicId",topicName);
+//        reqBody.put("replicationFactor","2");
+//        HttpRequest request = HttpRequest.newBuilder().setHeader("Content-Type", "application/json")
+//                .POST(ofFormData(reqBody))
+//                .uri(URI.create("http://192.168.106.100:8700/create-topic-replica"))
+//                .build();
+//        try {
+//            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+	}
+	
+	public static HttpRequest.BodyPublisher ofFormData(Map<Object, Object> data) {
+        var builder = new StringBuilder();
+        for (Map.Entry<Object, Object> entry : data.entrySet()) {
+            if (builder.length() > 0) {
+                builder.append("&");
+            }
+            builder.append(URLEncoder.encode(entry.getKey().toString(), StandardCharsets.UTF_8));
+            builder.append("=");
+            builder.append(URLEncoder.encode(entry.getValue().toString(), StandardCharsets.UTF_8));
+        }
+        System.out.println(builder.toString());
+        return HttpRequest.BodyPublishers.ofString(builder.toString());
+    }
 
 	/**
 	 * respond to a received message
@@ -210,13 +307,13 @@ class SessionHandler extends Thread {
 	 * 
 	 * @param msg
 	 */
-	private void respondToCreateTopic(Message msg,String s) {
+	private void respondToCreateTopic(Message msg,String message) {
 		if (_verbose)
 			System.out.println("--> responding to join: " + msg);
 		msg.setStatus("200");
 		msg.setSource(""+this.getId());
-		msg.setPayload(s);
-		ackResponse(msg, s);
+		msg.setPayload(message);
+		ackResponse(msg, message);
 	}
 	
 	private void respondToProduceMessage(Message msg,String s) {

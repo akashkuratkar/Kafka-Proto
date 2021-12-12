@@ -24,10 +24,16 @@ public class MasterService {
 	public String create_topic(String topic_name) {
 		synchronized (_mutex) {
 			File f = new File(topic_name + ".csv");
-			if (f.exists() && !f.isDirectory()) {
+			if (f.exists() && !f.isDirectory() && MasterConfig.topic_list.containsKey(topic_name)) {
 				return "Topic already exist";
 			} else {
 					MasterConfig.topic_list.put(topic_name,new ArrayList<Subscribe>());
+					try {
+						f.createNewFile();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 			}
 		}
 		return "Topic created successfully!";

@@ -7,6 +7,6 @@ import java.util.Map;
 import kafka.comm.models.Subscribe;
 
 public class MasterConfig {
-	public static Map<String,List<Subscribe>>topic_list;
+	public static Map<String,List<Subscribe>>topic_list = new HashMap<>();
 
 }

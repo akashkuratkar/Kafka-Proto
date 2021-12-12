@@ -111,6 +111,7 @@ public class BasicBuilder extends MessageBuilder {
 			String header = bd[0];
 
 			String[] hparts = header.split(",");
+			System.out.println(hparts.length);
 			if (hparts.length != 8)
 				throw new RuntimeException("Unexpected message format (6)");
 
