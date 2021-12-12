@@ -17,6 +17,7 @@ public class ConsoleListener extends Thread {
 	private boolean _verbose = true;
 	private String conName  = "";
 	private String topicName  = "";
+	private boolean topicSubscribedSuccess = false;
 
 	public ConsoleListener(Socket socket, String conName, String topicName) {
 		this._socket = socket;
@@ -35,30 +36,13 @@ public class ConsoleListener extends Thread {
 		byte[] raw = new byte[2048];
 		while (_forever) {
 			try {
-//				int len = _socket.getInputStream().read(raw);
-//				if (len <= 0)
-//					continue;
-//
-//				// Reply from server
-//				String rs = new String(raw);
-//				System.out.println("    RCV: " + rs);
-//
-//				try {
-//					List<Message> list = _msgBuilder.decode(new String(raw, 0, len).getBytes());
-//					for (Message msg : list) {
-//						System.out.print(msg.getPayload());
-////						if (_verbose)
-////							System.out.println("--> " + msg);
-//					}
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
 				//ping
 				var builder = new BasicBuilder();
-				byte[] msg = builder.encode(MessageBuilder.MessageType.pullMsg, "", conName, topicName,"", null).getBytes();
-				_socket.getOutputStream().write(msg);
-				_socket.getOutputStream().flush();
+				if(topicSubscribedSuccess) {
+					byte[] msg = builder.encode(MessageBuilder.MessageType.pullMsg, "", conName, topicName,"", null).getBytes();
+					_socket.getOutputStream().write(msg);
+					_socket.getOutputStream().flush();
+				}
 				
 				byte[] raw1 = new byte[2048];
 				int len = _socket.getInputStream().read(raw1);
@@ -70,9 +54,14 @@ public class ConsoleListener extends Thread {
 				System.out.println("    RCV: " + rs);
 				List<Message> list = builder.decode(new String(raw1, 0, len).getBytes());
 				for (Message mesg : list) {
-					System.out.print(mesg.getPayload());
-					if("Error".equals(mesg.getPayload())) {
+					String payld = mesg.getPayload();
+					System.out.print(payld);
+					if("Error".equals(payld)) {
 						System.err.println("Error occurred on server side");
+						break;
+					} else if(payld.contains("Topic Subscribed Successfully")) {
+						topicSubscribedSuccess = true;
+						break;
 					}
 //					if (_verbose)
 //						System.out.println("--> " + msg);

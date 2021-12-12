@@ -48,17 +48,6 @@ public class ConsoleApp {
 		bc.setName(conName);
 		bc.setTopicName(topicName);
 		bc.startSession();
-//		bc.setName(name);
-//		bc.join(name);
-//
-//		System.out.println("\nWelcome " + name + "\n");
-//		System.out.println("Commands");
-//		System.out.println("-----------------------------------------------");
-//		System.out.println("help - show this menu");
-//		System.out.println("post - send a message to the group (default)");
-//		System.out.println("whoami - list my settings");
-//		System.out.println("exit - end session");
-//		System.out.println("");
 
 		boolean execute = true;
 		Scanner sc = new Scanner(System.in);
