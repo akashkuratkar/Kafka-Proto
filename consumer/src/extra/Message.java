@@ -75,37 +75,19 @@ public class Message {
 	//private Date sent;
 	private Date received;
 	private String Status;
-	private String destination;
-	private List<String> peers;
-	private TopicMessage message;
-	private TopicMessage topicMessage;
+	private String topicName;
 
-	public TopicMessage getTopicMessage() {
-		return topicMessage;
-	}
-
-	public void setTopicMessage(TopicMessage topicMessage) {
-		this.topicMessage = topicMessage;
-	}
-
-	public List<String> getPeers() {
-		return peers;
-	}
-
-	public void setPeers(List<String> peers) {
-		this.peers = peers;
-	}
 
 	public String getStatus() {
 		return Status;
 	}
 
-	public String getDestination() {
-		return destination;
+	public String getTopicName() {
+		return topicName;
 	}
 
-	public void setDestination(String destination) {
-		this.destination = destination;
+	public void setTopicName(String topicName) {
+		this.topicName = topicName;
 	}
 
 	public void setStatus(String status) {

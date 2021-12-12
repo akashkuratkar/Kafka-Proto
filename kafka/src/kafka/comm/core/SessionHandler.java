@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import kafka.MasterPublisher;
 import kafka.MasterService;
 import kafka.TopicMessage;
 import kafka.comm.extra.JsonBuilder;
@@ -34,11 +35,13 @@ class SessionHandler extends Thread {
 	private JsonBuilder _json ;
 	private MasterService _masterService;
 	private boolean _verbose = true;
+	private MasterPublisher messagePublisher;
 
 	public SessionHandler(Socket connection, long id) {
 		this._connection = connection;
 		this._id = id;
 		_masterService = new MasterService();
+		messagePublisher = new MasterPublisher();
 		// allow server to exit if
 		this.setDaemon(true);
 	}
@@ -133,8 +136,12 @@ class SessionHandler extends Thread {
 							 String s = _masterService.create_topic(msg.getPayload());
 							 respondToCreateTopic(msg,s);
 						} else if (msg.getType() == MessageType.subscribeTopic) {
-							 String s = _masterService.substribe_topic(msg.getTopicMessage().getTopic_name(),msg.getSource());
-							 respondToCreateTopic(msg,s);
+							 String s = _masterService.substribe_topic(msg.getPayload(),msg.getSource());
+							 respondToSubscribeTopic(msg,s);
+						}else if (msg.getType() == MessageType.pullMsg) {
+							String topicName = msg.getPayload();
+							 List<String> message = messagePublisher.on(topicName,msg.getSource());
+							 respondToGetMessage(msg,message,topicName);
 						}else if (msg.getType() == MessageType.sendMessage) {
 							TopicMessage tm = new TopicMessage();
 							tm.setMessageId(msg.getMid());
@@ -179,7 +186,7 @@ class SessionHandler extends Thread {
 			System.out.println("--> responding to a msg: " + msg);
 		msg.setStatus("200");
 		try {
-			send(msg.getDestination(),msg);
+			send(msg.getPayload(),msg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -198,7 +205,7 @@ class SessionHandler extends Thread {
 		for(SessionHandler sh:_sessions.getConnections()) {
 			ar.add(""+sh._id);
 		}
-		msg.setPeers(ar);
+		//msg.setPeers(ar);
 		ackResponse(msg,"Success");
 
 		
@@ -219,6 +226,27 @@ class SessionHandler extends Thread {
 		ackResponse(msg, s);
 	}
 	
+	private void respondToSubscribeTopic(Message msg,String s) {
+		if (_verbose)
+			System.out.println("--> responding to join: " + msg);
+		msg.setStatus("200");
+		msg.setSource(""+this.getId());
+		msg.setPayload(s);
+		ackResponse(msg, s);
+	}
+	
+	private void respondToGetMessage(Message msg,List<String> s,String topicName) {
+		if (_verbose)
+			System.out.println("--> responding to join: " + msg);
+		msg.setStatus("200");
+		msg.setSource(""+this.getId());
+		msg.setPayload(s.toString());
+		msg.setTopicName(topicName);
+		ackResponse(msg, s.toString());
+	}
+	
+	
+	
 	private void respondToProduceMessage(Message msg,String s) {
 		if (_verbose)
 			System.out.println("--> responding to join: " + msg);
@@ -235,7 +263,7 @@ class SessionHandler extends Thread {
 	private void ackResponse(Message msg, String body) {
 		try {
 			var builder = new BasicBuilder();
-			byte[] raw = builder.encode(msg.getType(), msg.getMid(), msg.getSource(), msg.getPayload(),msg.getDestination(), msg.getReceived()).getBytes();
+			byte[] raw = builder.encode(msg.getType(), msg.getMid(), msg.getSource(), msg.getPayload(),msg.getTopicName(), msg.getReceived()).getBytes();
 			_connection.getOutputStream().write(raw);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -275,7 +303,7 @@ class SessionHandler extends Thread {
 			if((""+sh.getId()).equalsIgnoreCase(msg.getSource())) {
 			var builder = new BasicBuilder();
 			byte[] raw = builder
-					.encode(msg.getType(), msg.getMid(), msg.getSource(), msg.getPayload(),msg.getDestination(), msg.getReceived())
+					.encode(msg.getType(), msg.getMid(), msg.getSource(), msg.getPayload(),msg.getTopicName(), msg.getReceived())
 					.getBytes();
 			sh._connection.getOutputStream().write(raw);
 			sh._connection.getOutputStream().flush();
@@ -297,7 +325,7 @@ class SessionHandler extends Thread {
 			if (sh.getSessionId() == Integer.valueOf(to)) {
 				var builder = new BasicBuilder();
 				byte[] raw = builder
-						.encode(msg.getType(), msg.getMid(), msg.getSource(), msg.getPayload(),msg.getDestination(), msg.getReceived())
+						.encode(msg.getType(), msg.getMid(), msg.getSource(), msg.getPayload(),msg.getTopicName(), msg.getReceived())
 						.getBytes();
 				sh._connection.getOutputStream().write(raw);
 				sh._connection.getOutputStream().flush();

@@ -22,7 +22,7 @@ public class BasicBuilder extends MessageBuilder {
 	}
 
 	@Override
-	public String encode(MessageType type, String msgId, String source, String body, String dest, Date received) {
+	public String encode(MessageType type, String msgId, String source, String body, String topicName, Date received) {
 		String payload = null;
 		if (body != null)
 			payload = body.trim();
@@ -44,7 +44,7 @@ public class BasicBuilder extends MessageBuilder {
 			sb.append(source.trim());
 		sb.append(',');
 	
-			sb.append(""+dest);
+			sb.append(""+topicName);
 		sb.append(',');
 		if (payload == null) {
 			sb.append(0);
@@ -122,7 +122,7 @@ public class BasicBuilder extends MessageBuilder {
 			if (hparts[2].length() > 0)
 				bo.setReceived(new Date(Long.parseLong(hparts[2])));
 			if(!hparts[6].isEmpty()) {
-				bo.setDestination(hparts[6]);
+				bo.setTopicName(hparts[6]);
 			}
 			// entry 2 is not used
 

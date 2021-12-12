@@ -8,7 +8,7 @@ import kafka.comm.extra.Message;
 public abstract class MessageBuilder {
 
 	public enum MessageType {
-		ping, join, leave, msg, list, stat, received, all, createTopic, heartBeat,leader,follower,sendMessage,subscribeTopic
+		ping, join, leave, msg, list, stat, received, all, createTopic, heartBeat,leader,follower,sendMessage,subscribeTopic,pullMsg
 	}
 
 	private boolean _verbose;

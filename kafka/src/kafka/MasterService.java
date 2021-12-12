@@ -15,10 +15,11 @@ import kafka.comm.models.Subscribe;
 public class MasterService {
 	private final Integer _mutex;
 	BufferedReader buffReader;
-	private final MasterPublisher masterPublisher = new MasterPublisher();
+	//private final MasterPublisher masterPublisher = new MasterPublisher();
 	
 	public MasterService() {
 		_mutex = Integer.valueOf(1);
+		MasterConfig.topic_list.put("Ali",new ArrayList<>());
 	}
 
 	public String create_topic(String topic_name) {
@@ -42,11 +43,11 @@ public class MasterService {
 	public String substribe_topic(String topic_name,String consumer_name) {
 		synchronized (_mutex) {
 			File f = new File(topic_name + ".csv");
-			if (f.exists() && !f.isDirectory()) {
+			if (f.exists() && !f.isDirectory() && MasterConfig.topic_list.containsKey(topic_name)) {
 				List<Subscribe> subsribers = MasterConfig.topic_list.get(topic_name);
 				subsribers.add(new Subscribe(consumer_name,0));
 				return "Topic Subscribed Successfully";
-			} 
+			}
 		}
 		return "Topic does not exist!";
 	}
@@ -63,7 +64,7 @@ public class MasterService {
 
 					writer.flush();
 					writer.close();
-					masterPublisher.fan_out(message.topic_name);
+					//masterPublisher.fan_out(message.topic_name);
 					return "Message added succssfully!";
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -80,21 +81,23 @@ public class MasterService {
 		return true;
 	}
 	
-	public String read_message(String topic_name,int offset) {
+	public List<String> read_message(String topic_name,Subscribe sub) {
 		synchronized (_mutex) {
 				try {
-					getCsvReader(topic_name);
-					return read(offset);
+					var path =topic_name + ".csv";
+					getCsvReader(path);
+					return read(sub);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
 		}
-		return "Error in writing message";
+		return null;
 	}
 	
-	public String read(int id) {
+	public List<String> read(Subscribe sub) {
 		int counter =  1;
+		List<String> messages = new ArrayList<>();
 
 		try {
 			while(true) {
@@ -102,18 +105,20 @@ public class MasterService {
 			String line = this.buffReader.readLine();
 
 			if (line != null) {
-				if(counter==id+1) {
-					return line;
+				if(counter>=sub.getOffset()+1) {
+					messages.add(line);
 				}else{
 					counter++;
 				}
 			
 			} else {
 
-				return null;
+				break;
 
 			}
 			}
+			sub.setOffset(counter);
+			return messages;
 
 		} catch (IOException e) {
 
