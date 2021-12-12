@@ -1,9 +1,8 @@
-package gash.comm.extra;
+package kafka.comm.extra;
 
 import java.util.Date;
-import java.util.List;
 
-import gash.comm.payload.MessageBuilder.MessageType;
+import kafka.comm.payload.MessageBuilder.MessageType;
 
 public class Message {
 	// header info
@@ -13,44 +12,24 @@ public class Message {
 	//private Date sent;
 	private Date received;
 	private String Status;
-	private String destination;
-	private List<String> peers;
-	private TopicMessage topicMessage;
-
-	public TopicMessage getTopicMessage() {
-		return topicMessage;
-	}
-
-	public void setTopicMessage(TopicMessage topicMessage) {
-		this.topicMessage = topicMessage;
-	}
-
-	public List<String> getPeers() {
-		return peers;
-	}
-
-	public void setPeers(List<String> peers) {
-		this.peers = peers;
-	}
-
+	private String topicName;
+	private String payload;
+	
 	public String getStatus() {
 		return Status;
 	}
 
-	public String getDestination() {
-		return destination;
+	public String getTopicName() {
+		return topicName;
 	}
 
-	public void setDestination(String destination) {
-		this.destination = destination;
+	public void setTopicName(String topicName) {
+		this.topicName = topicName;
 	}
 
 	public void setStatus(String status) {
 		Status = status;
 	}
-
-	// message body
-	private String payload;
 
 	public MessageType getType() {
 		return type;
@@ -99,4 +78,5 @@ public class Message {
 	public void setMid(String mid) {
 		this.mid = mid;
 	}
+	
 }

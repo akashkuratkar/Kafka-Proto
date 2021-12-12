@@ -24,7 +24,7 @@ public class BasicClient {
 	private long _sentCount = 0l;
 	private int id;
 
-	private String _host = "localhost"; // "127.0.0.1" ;
+	private String _host = "172.20.10.7"; // "127.0.0.1" ;
 	private ConsoleListener _listener;
 	private Socket _socket;
 	private String _name;
