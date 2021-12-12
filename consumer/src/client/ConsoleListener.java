@@ -51,17 +51,24 @@ public class ConsoleListener extends Thread {
 
 				// Reply from server
 				String rs = new String(raw1);
-				System.out.println("    RCV: " + rs);
+				//System.out.println("    RCV: " + rs);
 				List<Message> list = builder.decode(new String(raw1, 0, len).getBytes());
 				for (Message mesg : list) {
 					String payld = mesg.getPayload();
-					System.out.print(payld);
+					
 					if("Error".equals(payld)) {
+						System.out.print(payld);
 						System.err.println("Error occurred on server side");
 						break;
 					} else if(payld.contains("Topic Subscribed Successfully")) {
+						System.out.print(payld);
 						topicSubscribedSuccess = true;
 						break;
+					} else {
+						String[] val = new String[2];
+						val[0] = mesg.getTopicName();
+						val[1]  = payld;
+						MasterQueue.addToQueue(val);
 					}
 //					if (_verbose)
 //						System.out.println("--> " + msg);

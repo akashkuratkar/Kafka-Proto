@@ -23,6 +23,7 @@ public class BasicClient {
 
 	private String _host = "localhost"; // "127.0.0.1" ;
 	private ConsoleListener _listener;
+	private QueueReader queueReader;
 	private Socket _socket;
 	private String _name;
 
@@ -71,7 +72,9 @@ public class BasicClient {
 
 			// establish response handler
 			_listener = new ConsoleListener(_socket, _name, topicName);
+			queueReader = new QueueReader();
 			_listener.start();
+			queueReader.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -89,6 +92,7 @@ public class BasicClient {
 		try {
 			if (_listener != null)
 				_listener.stopListening();
+			queueReader.stopForever();
 
 			var builder = new BasicBuilder();
 			byte[] msg = builder.encode(MessageBuilder.MessageType.leave, getID(), _name, null,"", null).getBytes();
