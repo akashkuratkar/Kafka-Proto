@@ -70,8 +70,10 @@ public class ConsoleListener extends Thread {
 			} catch (Exception e
 					) {
 				System.err.println("Error occured:"+ e.getMessage());
+				
 				try {
 					Thread.sleep(5000);
+					ConsoleApp.getIpAddress();
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

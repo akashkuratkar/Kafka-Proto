@@ -13,11 +13,11 @@ public class MasterConfig {
 	public static Map<String,List<Subscribe>>topic_list = new HashMap<>();
 	
 	public static String convertMapToString(Map<String, List<Subscribe>> map) {
-        StringBuilder mapAsString = new StringBuilder("{");
+        StringBuilder mapAsString = new StringBuilder();
         for (String key : map.keySet()) {
             mapAsString.append(key + "=" + convertObject(map.get(key)) + "; ");
         }
-        mapAsString.delete(mapAsString.length()-2, mapAsString.length()).append("}");
+        mapAsString.delete(mapAsString.length()-2, mapAsString.length());
         return mapAsString.toString();
     }
 
