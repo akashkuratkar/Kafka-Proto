@@ -32,54 +32,70 @@ public class Driver {
 
 
 
-	public static void main(String[] args) {
+	public static void main(String[] args)  {
 		// TODO Auto-generated method stub
-		var p = new Properties();
+		while(true) {
+			var p = new Properties();
 
 
-		p.setProperty("host", "172.20.10.12");
+			p.setProperty("host", "172.20.10.12");
 
-		p.setProperty("port", "7777");
-		
-		
-		Date date = new Date();
-		var ca = new ConsoleApp(p);
-		BasicClient bc = new BasicClient(ca.get_setup());
-		bc.startSession();
+			p.setProperty("port", "2100");
+
+
+
+			var ca = new ConsoleApp(p);
+			BasicClient bc = new BasicClient(ca.get_setup());
+			try {
+
+
+				bc.startSession();
 //		HeartBeat beat = new HeartBeat(bc,1000,1000);
 //		beat.start();
-		System.out.println("Conenected to keeper!");
-		/*Producer prod = new Producer();
-		BasicBuilder bbld = new BasicBuilder();
-		Topic t = prod.createTopic("Ali");
-		//System.out.println(t.toString());
-		prod.sendMessage(bc, t);
-		TopicMessage tm = new TopicMessage("Ali","Awesome123","127371237172");
-		//String awesome = bbld.encode(MessageBuilder.MessageType.msg, "1", "G.O.A.T","God of Lords", "Ali1",date,tm );
-		System.out.println(tm.toString());
-		//System.out.println(awesome);
-		prod.sendMessage(bc, tm);
-		System.out.println();
+				System.out.println("Conenected to keeper!");
+				Producer prod = new Producer();
+				BasicBuilder bbld = new BasicBuilder();
+				Topic t = prod.createTopic("Ali123");
+				//System.out.println(t.toString());
+				prod.sendMessage(bc, t);
+				TopicMessage tm = new TopicMessage("Ali123", "Awesome123", "127371237172");
+				//String awesome = bbld.encode(MessageBuilder.MessageType.msg, "1", "G.O.A.T","God of Lords", "Ali1",date,tm );
+				System.out.println(tm.toString());
+				//System.out.println(awesome);
+				prod.sendMessage(bc, tm);
+				System.out.println();
 
-		TopicMessage tm1 = new TopicMessage("Ali","Awesome456","127371237172");
-		//String awesome = bbld.encode(MessageBuilder.MessageType.msg, "1", "G.O.A.T","God of Lords", "Ali1",date,tm );
-		System.out.println(tm.toString());
-		//System.out.println(awesome);
-		prod.sendMessage(bc, tm1);
-		System.out.println();
+				TopicMessage tm1 = new TopicMessage("Ali123", "Awesome456", "127371237172");
+				//String awesome = bbld.encode(MessageBuilder.MessageType.msg, "1", "G.O.A.T","God of Lords", "Ali1",date,tm );
+				System.out.println(tm.toString());
+				//System.out.println(awesome);
+				//Thread.sleep(20);
+				System.out.println("After sleep");
+				prod.sendMessage(bc, tm1);
+				System.out.println();
 
-		TopicMessage tm2 = new TopicMessage("Ali","Awesome789","127371237172");
-		//String awesome = bbld.encode(MessageBuilder.MessageType.msg, "1", "G.O.A.T","God of Lords", "Ali1",date,tm );
-		System.out.println(tm.toString());
-		//System.out.println(awesome);
-		prod.sendMessage(bc, tm2);
-		System.out.println();
-		
-		
-		Topic t1 = prod.createTopic("Ali");
-		//System.out.println(t.toString());
-		prod.sendMessage(bc, t1);*/
+				TopicMessage tm2 = new TopicMessage("Ali123", "Awesome789", "127371237172");
+				//String awesome = bbld.encode(MessageBuilder.MessageType.msg, "1", "G.O.A.T","God of Lords", "Ali1",date,tm );
+				System.out.println(tm.toString());
+				//System.out.println(awesome);
+				prod.sendMessage(bc, tm2);
+				System.out.println();
 
+				Thread.sleep(10000);
+
+
+				Topic t2 = prod.createTopic("Akash1235");
+				//System.out.println(t.toString());
+				prod.sendMessage(bc, t2);
+				TopicMessage tm3 = new TopicMessage("Akash1235", "This is a new Message", "127371237172");
+
+				prod.sendMessage(bc, tm3);
+				bc.stopSession();
+			} catch (Exception e) {
+
+				continue;
+			}
+		}
 	}
 
 }

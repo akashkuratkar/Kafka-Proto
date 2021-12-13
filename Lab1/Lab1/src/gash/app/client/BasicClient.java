@@ -40,10 +40,10 @@ public class BasicClient{
 
 
 
-	public static void getIpAddress(){
+	public void getIpAddress(){
 
 		try {
-			Socket socket = new Socket("172.20.10.11", 7777);
+			Socket socket = new Socket("10.0.0.36", 7777);
 			System.out.println("Connected!");
 			InputStream inputStream = socket.getInputStream();
 			DataInputStream dataInputStream = new DataInputStream(inputStream);
@@ -52,6 +52,7 @@ public class BasicClient{
 			System.out.println("Closing sockets.");
 			socket.close();
 			_host = message;
+
 			return ;
 		}
 		catch(Exception e) {
@@ -107,7 +108,7 @@ public class BasicClient{
 		String port = _setup.getProperty(Settings.PropertyPort);
 		if (_host == null || port == null)
 			throw new RuntimeException("Missing port and/or host");
-
+		System.out.println(_host+"     "+port);
 		try {
 			_socket = new Socket(_host, Integer.parseInt(port));
 			System.out.println("Connected to " + _socket.getInetAddress().getHostAddress());
