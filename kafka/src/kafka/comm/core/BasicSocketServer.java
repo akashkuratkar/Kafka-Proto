@@ -1,7 +1,10 @@
 package kafka.comm.core;
 
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Properties;
+
+import kafka.app.client.ConsoleListener;
 
 /**
  * server to manage incoming clients. Default port is 2100.
@@ -12,10 +15,12 @@ import java.util.Properties;
 public class BasicSocketServer {
 	private Properties _setup;
 	private ServerSocket _socket;
+	private Socket _zooSocket;
 	private long _idCounter = 1;
 	private boolean _forever = true;
 	private Sessions _connections;
 	private MonitorSessions _monitor;
+	private ConsoleListener consoleListener; 
 
 	private boolean _verbose = true;
 
@@ -28,7 +33,7 @@ public class BasicSocketServer {
 		this._setup.setProperty(Settings.PropertyPort, String.valueOf(sDefaultPort));
 		this._setup.setProperty(Settings.PropertyTimeout, String.valueOf(sDefaultIdle));
 		this._setup.setProperty(Settings.PropertyFreq, String.valueOf(sDefaultFreq));
-
+		
 		this._connections = new Sessions();
 	}
 
@@ -48,13 +53,16 @@ public class BasicSocketServer {
 	 * start monitoring _socket for new _connections
 	 */
 	public void start() {
+		
 		if (_setup == null)
 			throw new RuntimeException("Missing configuration properties");
 
 		try {
 			var port = Integer.parseInt(_setup.getProperty(Settings.PropertyPort, String.valueOf(sDefaultPort)));
 			_socket = new ServerSocket(port);
-
+			_zooSocket = new Socket("10.0.036", 5003);
+			consoleListener = new ConsoleListener(_zooSocket);
+			consoleListener.start();
 			// how frequent do we monitor and when to remove idle sessions
 			var idleout = Long.parseLong(_setup.getProperty(Settings.PropertyTimeout,String.valueOf(sDefaultIdle)));
 			if (idleout < sDefaultIdle)

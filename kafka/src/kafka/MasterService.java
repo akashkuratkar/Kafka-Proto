@@ -19,7 +19,7 @@ public class MasterService {
 	
 	public MasterService() {
 		_mutex = Integer.valueOf(1);
-		MasterConfig.topic_list.put("Ali",new ArrayList<>());
+		//MasterConfig.topic_list.put("Ali",new ArrayList<>());
 	}
 
 	public String create_topic(String topic_name) {
@@ -105,11 +105,10 @@ public class MasterService {
 			String line = this.buffReader.readLine();
 
 			if (line != null) {
-				if(counter>=sub.getOffset()+1) {
+				if(counter>=sub.getOffset()) {
 					messages.add(line);
-				}else{
-					counter++;
 				}
+				counter++;
 			
 			} else {
 

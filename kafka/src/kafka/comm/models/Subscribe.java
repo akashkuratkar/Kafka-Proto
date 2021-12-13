@@ -2,6 +2,9 @@ package kafka.comm.models;
 
 public class Subscribe {
 
+	public Subscribe() {
+		super();
+	}
 	private String subscribe_id;
 	private int offset;
 	
