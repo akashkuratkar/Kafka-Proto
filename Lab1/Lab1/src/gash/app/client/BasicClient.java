@@ -1,5 +1,8 @@
 package gash.app.client;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -17,14 +20,15 @@ import gash.comm.payload.MessageBuilder;
  * @author gash
  * 
  */
-public class BasicClient {
+public class BasicClient{
 	private Properties _setup;
 
 	private long _count = 0l;
 	private long _sentCount = 0l;
 	private int id;
 
-	private String _host = "localhost"; // "127.0.0.1" ;
+
+	private static String _host = "";
 	private ConsoleListener _listener;
 	private Socket _socket;
 	private String _name;
@@ -33,7 +37,36 @@ public class BasicClient {
 	/**
 	 * empty constructor
 	 */
+
+
+
+	public static void getIpAddress(){
+
+		try {
+			Socket socket = new Socket("172.20.10.11", 7777);
+			System.out.println("Connected!");
+			InputStream inputStream = socket.getInputStream();
+			DataInputStream dataInputStream = new DataInputStream(inputStream);
+			String message = dataInputStream.readUTF();
+			System.out.println("The message sent from the socket was: " + message);
+			System.out.println("Closing sockets.");
+			socket.close();
+			_host = message;
+			return ;
+		}
+		catch(Exception e) {
+
+		}
+
+
+
+
+	}
+
+
 	public BasicClient() {
+		//this._host = host;
+		//this._host = get
 		queue = new LinkedList<>();
 	}
 
@@ -69,13 +102,14 @@ public class BasicClient {
 			return;
 		}
 
-		String host = _setup.getProperty(Settings.PropertyHost);
+		 getIpAddress();
+		//String host = _setup.getProperty(Settings.PropertyHost);
 		String port = _setup.getProperty(Settings.PropertyPort);
-		if (host == null || port == null)
+		if (_host == null || port == null)
 			throw new RuntimeException("Missing port and/or host");
 
 		try {
-			_socket = new Socket(host, Integer.parseInt(port));
+			_socket = new Socket(_host, Integer.parseInt(port));
 			System.out.println("Connected to " + _socket.getInetAddress().getHostAddress());
 
 			// establish response handler

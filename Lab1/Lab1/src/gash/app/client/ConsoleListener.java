@@ -13,6 +13,7 @@ public class ConsoleListener extends Thread {
 	private boolean _forever = true;
 	private MessageBuilder _msgBuilder;
 	private long _receievedCount = 0;
+	public static String brokerIp="";
 
 	private boolean _verbose = true;
 
