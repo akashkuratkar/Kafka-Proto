@@ -134,6 +134,7 @@ public class BasicClient {
 	public void sendMessage(String message, MessageBuilder.MessageType msgType) {
 		if (_socket == null) {
 			System.out.println("message not sent");
+			ConsoleApp.getIpAddress();
 			return;
 		} else if (message != null && message.length() > 1024) {
 			System.out.println("message exceeds 1024 size limit");

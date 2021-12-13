@@ -45,7 +45,16 @@ public class MasterService {
 			File f = new File(topic_name + ".csv");
 			if (f.exists() && !f.isDirectory() && MasterConfig.topic_list.containsKey(topic_name)) {
 				List<Subscribe> subsribers = MasterConfig.topic_list.get(topic_name);
-				subsribers.add(new Subscribe(consumer_name,0));
+				boolean present=false;
+				for(Subscribe sub :subsribers) {
+					if(sub.getSubscribe_id().equals(consumer_name)) {
+						present=true;
+						break;
+					}
+				}
+				if(!present) {
+					subsribers.add(new Subscribe(consumer_name,0));
+				}
 				return "Topic Subscribed Successfully";
 			}
 		}

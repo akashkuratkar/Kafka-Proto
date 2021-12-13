@@ -6,22 +6,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kafka.MasterConfig;
-import kafka.comm.payload.BasicBuilder;
-import kafka.comm.payload.MessageBuilder;
+import kafka.comm.models.Subscribe;
 
 public class ConsoleListener extends Thread {
 	private Socket _socket;
 	private boolean _forever = true;
-	private MessageBuilder _msgBuilder;
 	private long _receievedCount = 0;
+	private ObjectMapper objectMapper;
 
-	private boolean _verbose = true;
 
 	public ConsoleListener(Socket socket) {
 		this._socket = socket;
-		_msgBuilder = new BasicBuilder();
+		 objectMapper =new ObjectMapper();
 	}
 
 	public void stopListening() {
@@ -48,11 +51,12 @@ public class ConsoleListener extends Thread {
 					String [] messages = message.split(" ");
 					if(messages[0].equalsIgnoreCase("False")) {
 						if(MasterConfig.topic_list.size()>0) {
-						 reply = MasterConfig.convertMapToString(MasterConfig.topic_list);
+						 reply =objectMapper.writeValueAsString(MasterConfig.topic_list);
 						}
+						//String json = new ObjectMapper().writeValueAsString(map);
 						sendMessage(reply);
 					}else {
-						MasterConfig.topic_list = MasterConfig.convertStringToMap(messages[1]);
+						MasterConfig.topic_list =objectMapper.readValue(messages[1],new TypeReference<Map<String,List< Subscribe>>>(){});
 						reply = MasterConfig.convertMapToString(MasterConfig.topic_list);
 						sendMessage(messages[1]);
 					}

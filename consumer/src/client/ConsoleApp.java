@@ -42,6 +42,13 @@ public class ConsoleApp {
 
 			} catch (Exception e) {
 				e.printStackTrace();
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				getIpAddress();
 			}
 		}
 
