@@ -60,7 +60,8 @@ public class BasicSocketServer {
 		try {
 			var port = Integer.parseInt(_setup.getProperty(Settings.PropertyPort, String.valueOf(sDefaultPort)));
 			_socket = new ServerSocket(port);
-			_zooSocket = new Socket("172.20.10.12", 5003);
+			_zooSocket = new Socket(""+this._setup.get("host"), Integer.parseInt(""+this._setup.get("zooport")));
+			//_zooSocket = new Socket("172.20.10.12",7777);
 			consoleListener = new ConsoleListener(_zooSocket);
 			consoleListener.start();
 			// how frequent do we monitor and when to remove idle sessions

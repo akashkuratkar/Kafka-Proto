@@ -1,11 +1,18 @@
 package kafka.comm.core;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.json.JSONObject;
 
 import kafka.MasterPublisher;
 import kafka.MasterService;
@@ -134,6 +141,9 @@ class SessionHandler extends Thread {
 					for (Message msg : list) {
 						if (msg.getType() == MessageType.createTopic) {
 							 String s = _masterService.create_topic(msg.getPayload());
+							 if(s.equals("Topic created successfully!")) {
+								 startReplica(msg.getPayload());
+							 }
 							 respondToCreateTopic(msg,s);
 						} else if (msg.getType() == MessageType.subscribeTopic) {
 							 String s = _masterService.substribe_topic(msg.getPayload(),msg.getSource());
@@ -335,6 +345,47 @@ class SessionHandler extends Thread {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void startReplica(String topicName) {
+		try {
+            //String formedUrl = leaderUrl+":"+ReplicaServiceConfig.REPLICA_SERVICE_PORT+"/leader-sync";
+            //String formedUrl ="http://localhost:5676/get_topic_leader/";
+            //System.out.println("get data url formed : " + formedUrl);
+            URL url = new URL("http://192.168.106.100:8700/create-topic-replica");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            JSONObject cred = new JSONObject();
+            JSONObject parent=new JSONObject();
+            cred.put("topicId",topicName);
+            cred.put("replicationFactor", 2);
+
+            OutputStreamWriter wr= new OutputStreamWriter(conn.getOutputStream());
+            wr.write(cred.toString());
+            wr.flush();
+
+            StringBuilder sb = new StringBuilder();
+            int HttpResult = conn.getResponseCode();
+            if (HttpResult == HttpURLConnection.HTTP_OK) {
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), "utf-8"));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                br.close();
+                System.out.println(sb.toString());
+            } else {
+                System.out.println(conn.getResponseMessage());
+            }
+		}catch(Exception e) {
+			System.out.println(e);
+            }
+ 
 	}
 
 } // class SessionHandler

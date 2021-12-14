@@ -56,9 +56,12 @@ public class ConsoleListener extends Thread {
 						//String json = new ObjectMapper().writeValueAsString(map);
 						sendMessage(reply);
 					}else {
-						MasterConfig.topic_list =objectMapper.readValue(messages[1],new TypeReference<Map<String,List< Subscribe>>>(){});
-						reply = MasterConfig.convertMapToString(MasterConfig.topic_list);
-						sendMessage(messages[1]);
+						if(messages.length>1) {
+							MasterConfig.topic_list =objectMapper.readValue(messages[1],new TypeReference<Map<String,List< Subscribe>>>(){});
+							reply = MasterConfig.convertMapToString(MasterConfig.topic_list);
+						}
+	
+						sendMessage(reply);
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

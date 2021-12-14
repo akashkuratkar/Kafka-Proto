@@ -1,12 +1,15 @@
 package kafka;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +35,6 @@ public class MasterService {
 					try {
 						f.createNewFile();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 			}
@@ -53,7 +55,14 @@ public class MasterService {
 					}
 				}
 				if(!present) {
-					subsribers.add(new Subscribe(consumer_name,0));
+					try {
+						int c = count(topic_name+".csv");
+						subsribers.add(new Subscribe(consumer_name,c));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 				}
 				return "Topic Subscribed Successfully";
 			}
@@ -159,5 +168,26 @@ public class MasterService {
 		// message.setMessageString("Akash");
 		// ms.write_message(message);
 		System.out.println(ms.create_topic("Test"));
+	}
+	
+	public int count(String filename) throws IOException {
+	    InputStream is = new BufferedInputStream(new FileInputStream(filename));
+	    try {
+	    byte[] c = new byte[1024];
+	    int count = 0;
+	    int readChars = 0;
+	    boolean empty = true;
+	    while ((readChars = is.read(c)) != -1) {
+	        empty = false;
+	        for (int i = 0; i < readChars; ++i) {
+	            if (c[i] == '\n') {
+	                ++count;
+	            }
+	        }
+	    }
+	    return (count == 0 && !empty) ? 1 : count;
+	    } finally {
+	    is.close();
+	   }
 	}
 }
