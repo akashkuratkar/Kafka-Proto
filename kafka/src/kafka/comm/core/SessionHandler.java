@@ -17,7 +17,6 @@ import org.json.JSONObject;
 import kafka.MasterPublisher;
 import kafka.MasterService;
 import kafka.TopicMessage;
-import kafka.comm.extra.JsonBuilder;
 import kafka.comm.extra.Message;
 import kafka.comm.payload.BasicBuilder;
 import kafka.comm.payload.MessageBuilder;
@@ -39,7 +38,6 @@ class SessionHandler extends Thread {
 	private BufferedInputStream _inSock = null;
 	private Sessions _sessions;
 	private MessageBuilder _msgBuilder;
-	private JsonBuilder _json ;
 	private MasterService _masterService;
 	private boolean _verbose = true;
 	private MasterPublisher messagePublisher;
@@ -281,15 +279,6 @@ class SessionHandler extends Thread {
 		}
 	}
 	
-	private void ackResponse(Message msg, List<String> body) {
-		try {
-			String response = _json.encode("Msg Type: "+msg.getType()+" Msg Id: "+msg.getMid()+"Msg Status:"+msg.getStatus()+" server: "+ body+" Status: "+ msg.getReceived());
-			_connection.getOutputStream().write(response.getBytes());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 	/**
 	 * record when last message was received - used for timing out of
@@ -352,7 +341,7 @@ class SessionHandler extends Thread {
             //String formedUrl = leaderUrl+":"+ReplicaServiceConfig.REPLICA_SERVICE_PORT+"/leader-sync";
             //String formedUrl ="http://localhost:5676/get_topic_leader/";
             //System.out.println("get data url formed : " + formedUrl);
-            URL url = new URL("http://192.168.106.100:8700/create-topic-replica");
+            URL url = new URL("http://localhost:8700/create-topic-replica");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -362,7 +351,7 @@ class SessionHandler extends Thread {
             JSONObject cred = new JSONObject();
             JSONObject parent=new JSONObject();
             cred.put("topicId",topicName);
-            cred.put("replicationFactor", 2);
+            cred.put("replicationFactor", 3);
 
             OutputStreamWriter wr= new OutputStreamWriter(conn.getOutputStream());
             wr.write(cred.toString());
